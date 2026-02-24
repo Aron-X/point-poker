@@ -1,0 +1,149 @@
+/* ==================== Issue 侧边栏 ==================== */
+
+.issue-panel {
+  width: 320px;
+  min-width: 320px;
+  background: var(--bg-white);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 57px);
+  animation: panelSlideIn 0.3s ease;
+}
+
+@keyframes panelSlideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* 头部 */
+.issue-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.issue-panel-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* 添加 Issue */
+.issue-add {
+  display: flex;
+  gap: 8px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.issue-add .input {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+/* Issue 列表 */
+.issue-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+.issue-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-light);
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.issue-empty span {
+  font-size: 12px;
+}
+
+.issue-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: var(--transition);
+  border-left: 3px solid transparent;
+}
+
+.issue-item:hover {
+  background: var(--bg-primary);
+}
+
+.issue-item.active {
+  background: var(--primary-light);
+  border-left-color: var(--primary);
+}
+
+.issue-index {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  background: var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.issue-item.active .issue-index {
+  background: var(--primary);
+  color: white;
+}
+
+.issue-title {
+  flex: 1;
+  font-size: 13px;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.issue-result {
+  padding: 2px 8px;
+  background: var(--success);
+  color: white;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.issue-delete {
+  opacity: 0;
+  flex-shrink: 0;
+  font-size: 14px;
+}
+
+.issue-item:hover .issue-delete {
+  opacity: 1;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .issue-panel {
+    position: fixed;
+    right: 0;
+    top: 57px;
+    bottom: 0;
+    z-index: 100;
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+  }
+}

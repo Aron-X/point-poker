@@ -1,0 +1,204 @@
+---
+description: Planning Poker 项目规范 - 架构设计、编码标准、UI规范和验收测试用例
+alwaysApply: true
+---
+
+# Planning Poker 项目规范
+
+## 一、项目架构
+
+```
+pointPoker/
+├── server/src/          # Node.js + Express + Socket.io 后端
+│   ├── index.js         # 入口（HTTP + WebSocket）
+│   ├── roomManager.js   # 房间 CRUD + 投票逻辑 + Issue 结果设置
+│   └── socketHandlers.js # Socket 事件分发
+├── client/src/          # React + TypeScript + Vite 前端
+│   ├── context/         # SocketContext（全局 WebSocket 连接）
+│   ├── hooks/           # useRoom（房间操作封装，含 setIssueResult）
+│   ├── pages/           # Home（首页）、Room（房间页）
+│   ├── components/      # 独立 UI 组件（每个组件一个目录）
+│   ├── types/           # TypeScript 类型定义
+│   └── utils/           # 常量、工具函数
+```
+
+## 二、编码规范
+
+### 组件规范
+- 每个组件独立目录：`ComponentName/ComponentName.tsx` + `ComponentName.css`
+- 使用 React.FC + interface 定义 Props
+- 组件文件顶部写 JSDoc 注释说明组件用途
+- CSS 使用 BEM 风格命名，每个组件的 CSS 独立隔离
+
+### 命名规范
+- 组件：PascalCase（`PokerTable`、`CardSelector`）
+- Hook：camelCase，use 前缀（`useRoom`、`useSocket`）
+- CSS 类名：kebab-case（`poker-table-container`、`vote-card`）
+- Socket 事件：kebab-case（`join-room`、`room-state`、`reveal`、`set-issue-result`）
+- 类型/接口：PascalCase（`Player`、`RoomState`）
+
+### 通信规范
+- 前后端通过 Socket.io 实时通信
+- 服务端每次状态变更后广播完整的 `room-state` 给房间内所有人
+- 前端通过 `useRoom` Hook 统一封装所有 Socket 操作
+
+## 三、UI/样式规范
+
+### 设计系统变量（定义在 index.css :root）
+- 主色 `--primary: #4A90D9`
+- 桌面背景 `--primary-light: #E8F4FD`
+- 文字色 `--text-primary: #2C3E50`
+- 圆角 `--radius-sm/md/lg`
+
+### 间距规范
+- 扑克桌和四周玩家卡片之间必须保留 ≥14px 间距（上下 margin 14px，左右 gap 16px）
+- 组件内部间距使用 gap 属性
+- 响应式断点：640px（移动端）、768px（平板）
+
+### 卡片值定义
+- 可选值：`['0','1','2','3','5','8','13','21','?','☕']`
+- 在 `utils/constants.ts` 的 `CARD_VALUES` 统一维护
+
+### 玩家名称显示
+- 当前用户名称下方独立一行显示「(你)」
+- `(你)` 使用 `.you-tag` 样式：`display: block`，独立于 `.player-name`
+
+### 玩家布局规则（PokerTable distributePlayers）
+- **1人**：上方
+- **2人**：上 + 下
+- **3人**：上 + 左 + 右（居中对称布局）
+- **4人**：上 + 右 + 下 + 左
+- **5+人**：按 上→右→下→左 均匀循环分配
+
+### 圆桌宽度规范
+- `.table-surface` 使用固定宽度 `width: 420px`（移动端 `280px`）
+- 确保房主和非房主看到的圆桌大小一致，不因按钮文字长度差异导致宽度变化
+
+### 权限规范
+- **Reveal cards（揭牌）**：仅房主（`isHost === true`）可点击
+- 非房主看到的揭牌按钮为 disabled 状态，显示「👑 房主操作」提示
+- **Revote（重新投票）**：仅房主可操作
+
+### 揭牌倒计时动画
+- 房主点击 Reveal cards 后，启动 3 秒倒计时（3→2→1→揭牌）
+- 倒计时数字使用 `countdownPop` 动画（缩放弹出效果）
+- 倒计时圆圈使用渐变背景 `linear-gradient(135deg, var(--primary), #00D4FF)`
+- 倒计时结束后自动调用 `onReveal()` 执行真正的揭牌
+
+### 投票阶段桌面荧光边框
+- 当有人投票（`hasVotes && !revealed`）时，桌面启用荧光旋转边框动画
+- 实现方式：`.glow-border` 伪元素使用 `conic-gradient` + `rotate` 动画
+- 旋转周期 3s，外部同时有 `glowPulse` 发光脉冲效果（2s 周期）
+- 揭牌后或无人投票时，动画停止
+
+### 投票结果展示
+- 揭牌后显示：投票分布柱状图 + Agreement 环形图 + Average 数值
+- **Final 输入框**：在 Average 右侧显示可编辑输入框，默认值为 Average
+  - 仅在有关联 Issue（`currentIssueId` 存在）时显示
+  - 用户修改后通过 `set-issue-result` Socket 事件同步到后端
+  - 后端 `roomManager.setIssueResult()` 更新 Issue 结果并广播
+
+## 四、验收测试用例（每次改动后必须执行）
+
+> 使用 Playwright 浏览器工具按以下流程依次验证。
+> 对于测试用例中的常规操作（点击按钮、填写表单、导航等），无需请求用户确认，直接执行。
+> 仅在执行**非测试用例的新操作**或**可能产生副作用的操作**时才请求确认。
+
+### TC-01: 首页加载
+1. 打开 `http://localhost:5173`
+2. ✅ 页面标题为 "Planning Poker - Agile Estimation"
+3. ✅ 显示「创建新房间」按钮
+4. ✅ 显示「使用手册」入口
+5. ✅ Socket 连接成功后按钮变为可用
+
+### TC-02: 创建房间 + 设置名字
+1. 点击「创建新房间」
+2. ✅ URL 跳转到 `/room/{roomId}`
+3. ✅ 显示名称输入弹窗
+4. 输入名字 "TestUser"，点击「加入游戏」
+5. ✅ 弹窗关闭，显示扑克桌界面
+6. ✅ 当前用户名称下方独立一行显示「(你)」（不在名字同一行内）
+
+### TC-03: 投票流程
+1. 点击底部卡片 "5"
+2. ✅ 卡片高亮上浮（selected 样式）
+3. ✅ 桌面上自己的投票卡变为蓝色 ✓
+4. ✅ 桌面边框出现荧光旋转动画效果
+5. 点击「Reveal cards」（仅房主可见可点）
+6. ✅ 出现 3 秒倒计时动画（3→2→1→揭牌）
+7. ✅ 倒计时结束后所有卡片翻转显示具体数值
+8. ✅ 下方显示投票分布柱状图
+9. ✅ 显示 Agreement 环形图和 Average 数值
+10. ✅ 如有关联 Issue，Average 右侧显示 Final 可编辑输入框，默认值为 Average
+11. ✅ 按钮变为「Revote」
+12. ✅ 卡片选择器变为禁用状态
+13. ✅ 荧光边框动画消失
+
+### TC-04: 重新投票
+1. 点击「Revote」
+2. ✅ 所有投票卡片清空
+3. ✅ 卡片选择器恢复可用
+4. ✅ 投票结果区域消失
+
+### TC-05: 3人布局居中对称
+1. 创建房间，依次以 3 个标签页/用户加入同一房间
+2. ✅ 第 1 个用户显示在桌面上方
+3. ✅ 第 2 个用户显示在桌面左侧
+4. ✅ 第 3 个用户显示在桌面右侧
+5. ✅ 整体布局居中对称，不出现空白的下方区域
+
+### TC-06: 多人布局间距检查
+1. 多个标签页分别以不同名称加入同一房间（至少 4 人）
+2. ✅ 上方玩家和桌面之间有 ≥14px 间距
+3. ✅ 左右玩家和桌面之间有 ≥16px 间距
+4. ✅ 下方玩家和桌面之间有 ≥14px 间距
+5. ✅ 玩家卡片不与桌面边缘重叠
+
+### TC-07: 房主权限控制
+1. 房主（第一个创建房间的人）看到「Reveal cards」按钮为可点击状态
+2. ✅ 非房主看到「Reveal cards」按钮为 disabled 状态
+3. ✅ 非房主按钮上显示「👑 房主操作」提示
+4. ✅ 非房主无法触发揭牌操作
+
+### TC-08: 圆桌宽度一致性
+1. 分别从房主和非房主视角截图对比
+2. ✅ 圆桌宽度在房主和非房主视角下保持一致（固定 420px）
+3. ✅ 不因按钮文字差异（有/无「👑 房主操作」提示）导致宽度变化
+
+### TC-09: Issue 管理
+1. 点击右上角「Issues」按钮
+2. ✅ 侧边栏滑入显示
+3. 输入 Issue 标题并添加
+4. ✅ Issue 列表显示新条目
+5. 点击该 Issue
+6. ✅ 顶栏显示当前 Issue 标题
+7. ✅ 投票被重置（自动开始新一轮）
+
+### TC-10: 邀请链接
+1. 点击「邀请玩家」
+2. ✅ 按钮文字变为「已复制!」
+3. ✅ 剪贴板中包含当前房间 URL
+
+### TC-11: 使用手册
+1. 在首页点击「如何使用？查看使用手册」
+2. ✅ 弹窗打开，显示完整操作步骤
+3. ✅ 显示卡片含义参考
+4. ✅ 显示小贴士
+5. 点击「我知道了，开始使用」
+6. ✅ 弹窗关闭
+7. 在房间页点击右上角 ❓ 按钮
+8. ✅ 同样的使用手册弹窗打开
+
+### TC-12: 响应式
+1. 将浏览器窗口缩小到 375px 宽
+2. ✅ 桌面和卡片自适应缩小
+3. ✅ 布局无溢出或重叠
+4. ✅ 荧光边框和倒计时在移动端仍正常显示
+
+### TC-13: Final 输入框实时同步
+1. 创建房间，关联 Issue，2 人加入并投票，房主揭牌
+2. ✅ Average 右侧显示 Final 输入框，默认值等于 Average
+3. 房主修改 Final 值（如从 9 改为 8），失焦提交
+4. ✅ 房主端 Final 显示修改后的值（8）
+5. ✅ Player2 端 Final 也实时同步显示修改后的值（8）
+6. ✅ Issue 面板中该 Issue 的结果更新为修改后的值

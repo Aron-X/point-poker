@@ -1,0 +1,300 @@
+/* ==================== 用户使用手册弹窗 ==================== */
+
+.guide-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+  animation: guideOverlayIn 0.2s ease;
+}
+
+@keyframes guideOverlayIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.guide-modal {
+  background: var(--bg-white);
+  border-radius: var(--radius-lg);
+  max-width: 680px;
+  width: 100%;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  animation: guideModalIn 0.3s ease;
+}
+
+@keyframes guideModalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* ===== 头部 ===== */
+.guide-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 28px 32px 20px;
+  border-bottom: 1px solid var(--border-light);
+  flex-shrink: 0;
+}
+
+.guide-header-text h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.guide-header-text p {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.guide-close {
+  width: 36px;
+  height: 36px;
+  font-size: 18px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.guide-close:hover {
+  color: var(--text-primary);
+  background: var(--border-light);
+}
+
+/* ===== 内容区 ===== */
+.guide-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 32px;
+}
+
+.guide-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.guide-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.guide-body::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+/* ===== 段落 ===== */
+.guide-section {
+  margin-bottom: 28px;
+}
+
+.guide-section:last-child {
+  margin-bottom: 0;
+}
+
+.guide-section-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--primary-light);
+}
+
+.guide-intro {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.8;
+}
+
+.guide-intro strong {
+  color: var(--primary);
+}
+
+/* ===== 操作步骤 ===== */
+.guide-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.guide-step {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  border-radius: var(--radius-md);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-light);
+  transition: var(--transition);
+}
+
+.guide-step:hover {
+  border-color: var(--primary);
+  box-shadow: 0 2px 12px rgba(74, 144, 217, 0.08);
+}
+
+.guide-step-number {
+  position: relative;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.step-icon {
+  font-size: 28px;
+}
+
+.step-num {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 20px;
+  height: 20px;
+  background: var(--primary);
+  color: white;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--bg-primary);
+}
+
+.guide-step-content h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.guide-step-content p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+/* ===== 卡片含义 ===== */
+.guide-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.guide-card-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-light);
+}
+
+.guide-card-value {
+  width: 36px;
+  height: 48px;
+  border: 2px solid var(--primary);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--primary);
+  background: var(--bg-white);
+  flex-shrink: 0;
+}
+
+.guide-card-meaning {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* ===== 小贴士 ===== */
+.guide-tips {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.guide-tips li {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  padding: 12px 16px;
+  background: #FFF9E6;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--warning);
+}
+
+.guide-tips li strong {
+  color: var(--text-primary);
+}
+
+/* ===== 底部 ===== */
+.guide-footer {
+  padding: 16px 32px 24px;
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.guide-footer .btn {
+  min-width: 200px;
+}
+
+/* ===== 响应式 ===== */
+@media (max-width: 640px) {
+  .guide-overlay {
+    padding: 10px;
+  }
+
+  .guide-modal {
+    max-height: 90vh;
+  }
+
+  .guide-header {
+    padding: 20px 20px 16px;
+  }
+
+  .guide-header-text h2 {
+    font-size: 18px;
+  }
+
+  .guide-body {
+    padding: 20px;
+  }
+
+  .guide-step {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .guide-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .guide-footer {
+    padding: 12px 20px 20px;
+  }
+}

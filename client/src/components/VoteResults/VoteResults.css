@@ -1,0 +1,227 @@
+/* ==================== 投票结果展示 ==================== */
+
+.vote-results {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 40px;
+  padding: 24px 20px;
+  width: 100%;
+  max-width: 700px;
+  animation: resultsIn 0.5s ease;
+}
+
+@keyframes resultsIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 柱状图区域 */
+.vote-distribution {
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+}
+
+.vote-bar-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.vote-bar-container {
+  width: 40px;
+  height: 80px;
+  background: var(--border-light);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.vote-bar {
+  width: 100%;
+  background: linear-gradient(to top, var(--primary), #6BB3E9);
+  border-radius: var(--radius-sm);
+  min-height: 8px;
+  transition: height 0.5s ease;
+}
+
+.vote-card-small {
+  width: 40px;
+  height: 52px;
+  border: 2px solid var(--text-primary);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  background: var(--bg-white);
+}
+
+.vote-count {
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* 统计信息 */
+.vote-summary {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+/* 一致性环形图 */
+.agreement-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.agreement-ring {
+  position: relative;
+  width: 100px;
+  height: 100px;
+}
+
+.agreement-svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.agreement-bg-circle {
+  fill: none;
+  stroke: var(--border-light);
+  stroke-width: 8;
+}
+
+.agreement-fill-circle {
+  fill: none;
+  stroke: var(--agreement-color, #2ECC71);
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s ease;
+}
+
+.agreement-value {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.agreement-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* 平均值 */
+.average-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.average-value {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.average-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* 最终结果输入框 */
+.final-result-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.final-result-input {
+  width: 80px;
+  height: 52px;
+  border: 2px solid var(--primary);
+  border-radius: var(--radius-md);
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--primary);
+  background: var(--bg-white);
+  outline: none;
+  transition: all 0.2s ease;
+  -moz-appearance: textfield;
+}
+
+.final-result-input::-webkit-inner-spin-button,
+.final-result-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.final-result-input:focus {
+  border-color: #00D4FF;
+  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.15);
+}
+
+.final-result-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* 响应式 */
+@media (max-width: 640px) {
+  .vote-results {
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    padding: 16px;
+  }
+
+  .vote-distribution {
+    gap: 12px;
+  }
+
+  .vote-bar-container {
+    width: 32px;
+    height: 60px;
+  }
+
+  .vote-card-small {
+    width: 32px;
+    height: 44px;
+    font-size: 13px;
+  }
+
+  .agreement-ring {
+    width: 80px;
+    height: 80px;
+  }
+
+  .vote-summary {
+    gap: 24px;
+  }
+}

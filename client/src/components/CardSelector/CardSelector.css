@@ -1,0 +1,153 @@
+/* ==================== 卡片选择器 ==================== */
+
+.card-selector {
+  width: 100%;
+  max-width: 700px;
+  padding: 20px 0;
+  text-align: center;
+}
+
+.card-selector-inner {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.card-option {
+  width: 60px;
+  height: 84px;
+  border: 2px solid var(--primary);
+  border-radius: var(--radius-sm);
+  background: var(--bg-white);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.card-option-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--primary);
+  user-select: none;
+}
+
+.card-option:hover:not(:disabled) {
+  transform: translateY(-8px);
+  box-shadow: 0 8px 20px rgba(74, 144, 217, 0.25);
+  border-color: var(--primary-hover);
+}
+
+.card-option.selected {
+  background: var(--primary);
+  border-color: var(--primary);
+  transform: translateY(-12px);
+  box-shadow: 0 10px 24px rgba(74, 144, 217, 0.35);
+}
+
+.card-option.selected .card-option-value {
+  color: white;
+}
+
+.card-option:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.card-option:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.card-selector.is-disabled .card-option {
+  border-color: var(--border);
+}
+
+.card-selector.is-disabled .card-option-value {
+  color: var(--text-light);
+}
+
+.card-selector.is-disabled .card-option.selected {
+  background: var(--text-light);
+  border-color: var(--text-light);
+}
+
+.card-selector.is-disabled .card-option.selected .card-option-value {
+  color: white;
+}
+
+/* Proposal 输入区域 */
+.proposal-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.proposal-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.proposal-input {
+  width: 220px;
+  padding: 6px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.proposal-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(74, 144, 217, 0.1);
+}
+
+.proposal-input::placeholder {
+  color: var(--text-light);
+}
+
+.proposal-count {
+  font-size: 11px;
+  color: var(--text-light);
+  min-width: 32px;
+}
+
+.card-selector-hint {
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin-top: 12px;
+}
+
+/* 响应式 */
+@media (max-width: 640px) {
+  .card-selector-inner {
+    gap: 6px;
+  }
+
+  .card-option {
+    width: 48px;
+    height: 68px;
+  }
+
+  .card-option-value {
+    font-size: 17px;
+  }
+
+  .card-option:hover:not(:disabled) {
+    transform: translateY(-6px);
+  }
+
+  .card-option.selected {
+    transform: translateY(-8px);
+  }
+}
