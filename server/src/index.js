@@ -43,7 +43,7 @@ app.get('/api/room/:roomId', (req, res) => {
 // ==================== 静态文件服务（生产环境） ====================
 
 if (process.env.NODE_ENV === 'production') {
-  const clientBuild = path.join(__dirname, '../../client/dist');
+  const clientBuild = path.join(__dirname, '../public');
   app.use(express.static(clientBuild));
   app.get('*', (req, res) => {
     res.sendFile(path.join(clientBuild, 'index.html'));
