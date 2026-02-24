@@ -2,8 +2,13 @@
 export const CARD_VALUES = ['0', '1', '2', '3', '5', '8', '13', '21', '?', '☕'];
 
 /** 服务器地址 */
-export const SERVER_URL =
-  import.meta.env.VITE_SERVER_URL || 'http://localhost:3001';
+export const SERVER_URL = (() => {
+  const env = import.meta.env.APP_ENV || import.meta.env.MODE;
+  if (env === 'production') {
+    return 'https://aron-point-poker.up.railway.app';
+  }
+  return import.meta.env.VITE_SERVER_URL || 'http://localhost:3001';
+})();
 
 /** 头像背景色列表 */
 export const AVATAR_COLORS = [

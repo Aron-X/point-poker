@@ -4,6 +4,7 @@ WORKDIR /app/client
 COPY client/package.json client/package-lock.json ./
 RUN npm ci
 COPY client/ ./
+ENV APP_ENV=production
 RUN npm run build
 
 # ----------- 构建后端 -------------
