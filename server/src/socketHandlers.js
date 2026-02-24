@@ -146,8 +146,10 @@ function setupSocketHandlers(io, roomManager) {
     socket.on('disconnect', () => {
       console.log(`[Socket] Client disconnected: ${socket.id}`);
       if (currentRoomId) {
-        roomManager.removePlayer(currentRoomId, socket.id);
-        broadcastRoomState(currentRoomId);
+        const rid = currentRoomId;
+        roomManager.removePlayer(rid, socket.id, () => {
+          broadcastRoomState(rid);
+        });
       }
     });
 

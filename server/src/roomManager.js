@@ -4,6 +4,8 @@ class RoomManager {
   constructor() {
     /** @type {Map<string, Room>} */
     this.rooms = new Map();
+    /** @type {Map<string, NodeJS.Timeout>} 断线宽限期定时器 (key: `${roomId}:${socketId}`) */
+    this.disconnectTimers = new Map();
   }
 
   /**
@@ -46,12 +48,31 @@ class RoomManager {
 
     // 检查是否是重连（通过 clientId 匹配）
     if (clientId) {
+      // 先检查宽限期中的"幽灵"玩家
+      for (const [timerKey, timerInfo] of this.disconnectTimers) {
+        if (timerInfo.roomId === roomId && timerInfo.clientId === clientId) {
+          // 取消宽限期定时器，恢复玩家
+          clearTimeout(timerInfo.timer);
+          this.disconnectTimers.delete(timerKey);
+
+          const ghost = timerInfo.player;
+          ghost.id = socketId;
+          room.players.set(socketId, ghost);
+
+          // 恢复投票和 proposal
+          if (timerInfo.vote !== undefined) room.votes.set(socketId, timerInfo.vote);
+          if (timerInfo.proposal) room.proposals.set(socketId, timerInfo.proposal);
+
+          console.log(`[Room] Player ${ghost.name} reconnected from grace period (clientId: ${clientId})`);
+          return { ...ghost, reconnected: true };
+        }
+      }
+
+      // 还在线的旧连接重连
       for (const [oldSocketId, existingPlayer] of room.players) {
         if (existingPlayer.clientId === clientId) {
-          // 重连：更新 socketId，保留之前的状态
           room.players.delete(oldSocketId);
 
-          // 迁移投票和 proposal
           const oldVote = room.votes.get(oldSocketId);
           if (oldVote !== undefined) {
             room.votes.delete(oldSocketId);
@@ -86,23 +107,74 @@ class RoomManager {
   }
 
   /**
-   * 从房间移除玩家
+   * 从房间移除玩家（带宽限期，允许 30 秒内重连）
+   * @param {Function} onActualRemove - 宽限期到期后真正移除时的回调（用于广播状态）
    */
-  removePlayer(roomId, socketId) {
+  removePlayer(roomId, socketId, onActualRemove) {
     const room = this.rooms.get(roomId);
     if (!room) return;
 
+    const player = room.players.get(socketId);
+    if (!player) return;
+
+    // 如果玩家有 clientId，进入宽限期而非直接删除
+    if (player.clientId) {
+      const vote = room.votes.get(socketId);
+      const proposal = room.proposals.get(socketId);
+
+      // 先从房间中移除
+      room.players.delete(socketId);
+      room.votes.delete(socketId);
+      room.proposals.delete(socketId);
+
+      const GRACE_PERIOD_MS = 30000;
+      const timerKey = `${roomId}:${player.clientId}`;
+
+      const timer = setTimeout(() => {
+        this.disconnectTimers.delete(timerKey);
+        console.log(`[Room] Grace period expired for ${player.name} in room ${roomId}`);
+
+        // 如果房间还在且已空，删除房间
+        const r = this.rooms.get(roomId);
+        if (r && r.players.size === 0) {
+          this.rooms.delete(roomId);
+        } else if (r) {
+          // 如果房主离开，指定新房主
+          const hasHost = [...r.players.values()].some((p) => p.isHost);
+          if (!hasHost) {
+            const firstPlayer = r.players.values().next().value;
+            if (firstPlayer) firstPlayer.isHost = true;
+          }
+          if (onActualRemove) onActualRemove();
+        }
+      }, GRACE_PERIOD_MS);
+
+      this.disconnectTimers.set(timerKey, {
+        timer,
+        roomId,
+        clientId: player.clientId,
+        player,
+        vote,
+        proposal,
+      });
+
+      console.log(`[Room] ${player.name} entered grace period (30s) for room ${roomId}`);
+
+      // 房间暂时为空但不删除（等宽限期到期）
+      // 不广播状态变更（玩家可能马上回来）
+      return;
+    }
+
+    // 无 clientId 的玩家直接移除
     room.players.delete(socketId);
     room.votes.delete(socketId);
     room.proposals.delete(socketId);
 
-    // 房间为空时删除房间
     if (room.players.size === 0) {
       this.rooms.delete(roomId);
       return;
     }
 
-    // 如果房主离开，指定新房主
     const hasHost = [...room.players.values()].some((p) => p.isHost);
     if (!hasHost) {
       const firstPlayer = room.players.values().next().value;
